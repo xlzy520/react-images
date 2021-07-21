@@ -1,42 +1,77 @@
-name: CI
-on: [push, pull_request]
+#name: CI
+#on: [push, pull_request]
+#
+#jobs:
+#  lint:
+#    name: ✔️ Lint
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v1
+#      - uses: borales/actions-yarn@v2.0.0
+#        with:
+#          cmd: install
+#      - uses: borales/actions-yarn@v2.0.0
+#        with:
+#          cmd: run lint
+#
+#  check-formatting:
+#    name: ✔️ Lint
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v1
+#      - uses: borales/actions-yarn@v2.0.0
+#        with:
+#          cmd: install
+#      - uses: borales/actions-yarn@v2.0.0
+#        with:
+#          cmd: run format:check
+#
+#  build:
+#    name: 🛠️ Build
+#    runs-on: ubuntu-latest
+#    needs:
+#      - lint
+#      - check-formatting
+#    steps:
+#      - uses: actions/checkout@v1
+#      - uses: borales/actions-yarn@v2.0.0
+#        with:
+#          cmd: install
+#      - uses: borales/actions-yarn@v2.0.0
+#        with:
+#          cmd: build
+
+
+name: Deploy
+on:
+  push:
+    branches:
+      - master
+env:
+  TZ: Asia/Shanghai
 
 jobs:
-  lint:
-    name: ✔️ Lint
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: borales/actions-yarn@v2.0.0
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2.3.4
         with:
-          cmd: install
-      - uses: borales/actions-yarn@v2.0.0
+          persist-credentials: false
+          fetch-depth: 0
+      - name: setup Node.js
+        uses: actions/setup-node@v1
         with:
-          cmd: run lint
-
-  check-formatting:
-    name: ✔️ Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: borales/actions-yarn@v2.0.0
+          node-version: '14.x'
+      - name: Install and Build 🔧
+        run: |
+          npm install
+          npm run build
+      - name: Deploy 🚀
+        uses: peaceiris/actions-gh-pages@v3.7.3
         with:
-          cmd: install
-      - uses: borales/actions-yarn@v2.0.0
-        with:
-          cmd: run format:check
-
-  build:
-    name: 🛠️ Build
-    runs-on: ubuntu-latest
-    needs:
-      - lint
-      - check-formatting
-    steps:
-      - uses: actions/checkout@v1
-      - uses: borales/actions-yarn@v2.0.0
-        with:
-          cmd: install
-      - uses: borales/actions-yarn@v2.0.0
-        with:
-          cmd: build
+          personal_token: ${{ secrets.PERSONAL_TOKEN }}
+          publish_dir: dist
+          commit_message: ${{ github.event.head_commit.message }}
+          # keep_files: false
+          force_orphan: true
