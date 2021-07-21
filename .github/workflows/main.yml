@@ -66,12 +66,12 @@ jobs:
       - name: Install and Build 🔧
         run: |
           npm install
-          npm run build
+          npm run build:docs
       - name: Deploy 🚀
         uses: peaceiris/actions-gh-pages@v3.7.3
         with:
           personal_token: ${{ secrets.PERSONAL_TOKEN }}
-          publish_dir: dist
+          publish_dir: docs/dist
           commit_message: ${{ github.event.head_commit.message }}
           # keep_files: false
           force_orphan: true
